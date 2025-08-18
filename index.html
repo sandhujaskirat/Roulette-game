@@ -1,0 +1,252 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roulette Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #006400;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    h1 { margin: 10px; }
+    .game {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .wheel {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 5px solid #fff;
+      margin: 20px;
+      overflow: hidden;
+    }
+    .wheel::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 8px; height: 8px;
+      background: white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+    .wheel-numbers {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      transform: rotate(0deg);
+      transition: transform 5s cubic-bezier(.17,.67,.83,.67);
+    }
+    .wheel-number {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: 0 -140px;
+      font-size: 10px;
+    }
+    .pointer {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 20px solid yellow;
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+    }
+    .table {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-auto-rows: 40px;
+      margin: 20px;
+      gap: 2px;
+    }
+    .cell {
+      background: green;
+      border: 1px solid white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      cursor: pointer;
+    }
+    .cell.red { background: red; }
+    .cell.black { background: black; }
+    .cell.zero { background: green; grid-row: span 12; }
+    .chip {
+      position: absolute;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: gold;
+      color: black;
+      font-size: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .controls {
+      margin: 20px;
+    }
+    .btn {
+      margin: 5px;
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+    .outside-bets {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      gap: 5px;
+      margin: 10px;
+    }
+    .outside-cell {
+      background: #222;
+      border: 1px solid white;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <h1>Roulette Game</h1>
+  <div class="game">
+    <div class="wheel">
+      <div class="pointer"></div>
+      <div class="wheel-numbers" id="wheelNumbers"></div>
+    </div>
+    <div>
+      <div class="table" id="table"></div>
+      <div class="outside-bets" id="outsideBets"></div>
+    </div>
+  </div>
+  <div class="controls">
+    Balance: $<span id="balance">1000</span><br>
+    Bet Amount: <input type="number" id="betAmount" value="25" min="1" style="width:60px;">
+    <button class="btn" onclick="clearBets()">Clear Bets</button>
+    <button class="btn" onclick="spinWheel()">Spin</button>
+  </div>
+  <script>
+    const balanceEl = document.getElementById('balance');
+    let balance = 1000;
+    const tableEl = document.getElementById('table');
+    const outsideEl = document.getElementById('outsideBets');
+    const wheelEl = document.getElementById('wheelNumbers');
+    const betAmountEl = document.getElementById('betAmount');
+    let bets = [];const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+const numbers = [0,...Array.from({length:36},(_,i)=>i+1)];
+
+// Build wheel numbers layout
+numbers.forEach((n,i)=>{
+  let div = document.createElement('div');
+  div.className = 'wheel-number';
+  div.style.transform = `rotate(${(i/numbers.length)*360}deg) translateY(-140px)`;
+  div.textContent = n;
+  div.style.color = n===0?'green':redNumbers.includes(n)?'red':'white';
+  wheelEl.appendChild(div);
+});
+
+// Build table grid
+let zeroCell = document.createElement('div');
+zeroCell.textContent = '0';
+zeroCell.className = 'cell zero';
+zeroCell.onclick=()=>placeBet('number',0,zeroCell);
+tableEl.appendChild(zeroCell);
+
+for(let r=0;r<12;r++){
+  for(let c=0;c<3;c++){
+    let num = r*3+(3-c);
+    let cell = document.createElement('div');
+    cell.textContent = num;
+    cell.className = 'cell ' + (redNumbers.includes(num)?'red':'black');
+    cell.onclick=()=>placeBet('number',num,cell);
+    tableEl.appendChild(cell);
+  }
+}
+
+// Build outside bets
+const outsideBets = [
+  {label:"1-12",type:"dozen",value:1},
+  {label:"13-24",type:"dozen",value:2},
+  {label:"25-36",type:"dozen",value:3},
+  {label:"Even",type:"evenodd",value:"even"},
+  {label:"Odd",type:"evenodd",value:"odd"},
+  {label:"Red",type:"color",value:"red"},
+  {label:"Black",type:"color",value:"black"}
+];
+outsideBets.forEach(b=>{
+  let div = document.createElement('div');
+  div.className = 'outside-cell';
+  div.textContent = b.label;
+  div.onclick=()=>placeBet(b.type,b.value,div);
+  outsideEl.appendChild(div);
+});
+
+function placeBet(type,value,cell){
+  let betAmount = parseInt(betAmountEl.value);
+  if(balance<betAmount) return alert('Not enough balance');
+  balance-=betAmount;
+  balanceEl.textContent=balance;
+  bets.push({type,value,amount:betAmount});
+  let chip=document.createElement('div');
+  chip.className='chip';
+  chip.textContent=betAmount;
+  chip.style.top = (Math.random()*10+10)+'px';
+  chip.style.left = (Math.random()*10+10)+'px';
+  cell.appendChild(chip);
+}
+
+function clearBets(){
+  bets=[];
+  document.querySelectorAll('.chip').forEach(c=>c.remove());
+}
+
+function spinWheel(){
+  if(bets.length===0) return alert('Place a bet first!');
+  const winningIndex = Math.floor(Math.random()*numbers.length);
+  const winningNumber = numbers[winningIndex];
+  wheelEl.style.transform = `rotate(${3600+ (360*(winningIndex/numbers.length))}deg)`;
+  setTimeout(()=>{
+    settleBets(winningNumber);
+  },5200);
+}
+
+function settleBets(win){
+  let winnings=0;
+  bets.forEach(b=>{
+    if(b.type==='number' && b.value===win) winnings+=b.amount*36;
+    if(b.type==='color'){
+      if(b.value==='red' && redNumbers.includes(win)) winnings+=b.amount*2;
+      if(b.value==='black' && !redNumbers.includes(win) && win!==0) winnings+=b.amount*2;
+    }
+    if(b.type==='evenodd'){
+      if(b.value==='even' && win%2===0 && win!==0) winnings+=b.amount*2;
+      if(b.value==='odd' && win%2===1) winnings+=b.amount*2;
+    }
+    if(b.type==='dozen'){
+      if(b.value===1 && win>=1&&win<=12) winnings+=b.amount*3;
+      if(b.value===2 && win>=13&&win<=24) winnings+=b.amount*3;
+      if(b.value===3 && win>=25&&win<=36) winnings+=b.amount*3;
+    }
+  });
+  balance+=winnings;
+  balanceEl.textContent=balance;
+  alert(`Winning number: ${win}\nYou won: $${winnings}`);
+  clearBets();
+}
+
+  </script>
+</body>
+</html>
