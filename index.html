@@ -1,252 +1,299 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roulette Game</title>
+  <meta charset="UTF-8">
+  <title>Jaskirat's Roulette Table</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #006400;
+      background: radial-gradient(circle, #0a0a0a, #222);
       color: white;
+      text-align: center;
       margin: 0;
       padding: 0;
     }
-    h1 { margin: 10px; }
-    .game {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    h1 {
+      padding: 20px;
+      color: gold;
+      text-shadow: 0 0 10px black;
     }
-    .wheel {
+    #roulette {
       position: relative;
-      width: 300px;
-      height: 300px;
+      width: 400px;
+      height: 400px;
+      margin: 20px auto;
       border-radius: 50%;
-      border: 5px solid #fff;
-      margin: 20px;
-      overflow: hidden;
+      border: 10px solid #444;
+      background: conic-gradient(
+        green 0deg 10deg,
+        red 10deg 20deg,
+        black 20deg 30deg,
+        red 30deg 40deg,
+        black 40deg 50deg,
+        red 50deg 60deg,
+        black 60deg 70deg,
+        red 70deg 80deg,
+        black 80deg 90deg,
+        red 90deg 100deg,
+        black 100deg 110deg,
+        red 110deg 120deg,
+        black 120deg 130deg,
+        red 130deg 140deg,
+        black 140deg 150deg,
+        red 150deg 160deg,
+        black 160deg 170deg,
+        red 170deg 180deg,
+        black 180deg 190deg,
+        red 190deg 200deg,
+        black 200deg 210deg,
+        red 210deg 220deg,
+        black 220deg 230deg,
+        red 230deg 240deg,
+        black 240deg 250deg,
+        red 250deg 260deg,
+        black 260deg 270deg,
+        red 270deg 280deg,
+        black 280deg 290deg,
+        red 290deg 300deg,
+        black 300deg 310deg,
+        red 310deg 320deg,
+        black 320deg 330deg,
+        red 330deg 340deg,
+        black 340deg 350deg,
+        green 350deg 360deg
+      );
     }
-    .wheel::before {
-      content: '';
+    #ball {
       position: absolute;
-      top: 50%; left: 50%;
-      width: 8px; height: 8px;
+      width: 20px;
+      height: 20px;
       background: white;
       border-radius: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
+      top: 10px;
+      left: 190px;
+      box-shadow: 0 0 5px #fff;
     }
-    .wheel-numbers {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      transform: rotate(0deg);
-      transition: transform 5s cubic-bezier(.17,.67,.83,.67);
-    }
-    .wheel-number {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform-origin: 0 -140px;
-      font-size: 10px;
-    }
-    .pointer {
-      width: 0;
-      height: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-bottom: 20px solid yellow;
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-    }
-    .table {
-      display: grid;
-      grid-template-columns: repeat(3, 60px);
-      grid-auto-rows: 40px;
-      margin: 20px;
-      gap: 2px;
+    #table {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .cell {
-      background: green;
-      border: 1px solid white;
+      width: 50px;
+      height: 50px;
+      border: 1px solid #333;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
       cursor: pointer;
+      position: relative;
     }
-    .cell.red { background: red; }
-    .cell.black { background: black; }
-    .cell.zero { background: green; grid-row: span 12; }
+    .cell.red { background: darkred; }
+    .cell.black { background: black; color: white; }
+    .cell.green { background: green; }
     .chip {
       position: absolute;
-      width: 30px; height: 30px;
-      border-radius: 50%;
+      bottom: 5px;
+      font-size: 14px;
       background: gold;
       color: black;
-      font-size: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      border-radius: 50%;
+      padding: 2px 6px;
+      border: 1px solid black;
     }
-    .controls {
+    #controls {
       margin: 20px;
     }
-    .btn {
-      margin: 5px;
-      padding: 8px 15px;
-      cursor: pointer;
+    #popup {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      padding: 30px;
+      border-radius: 15px;
+      display: none;
+      font-size: 20px;
     }
-    .outside-bets {
-      display: grid;
-      grid-template-columns: repeat(3, 120px);
-      gap: 5px;
-      margin: 10px;
+    #balance {
+      font-size: 18px;
+      margin-top: 10px;
     }
-    .outside-cell {
-      background: #222;
-      border: 1px solid white;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
+    canvas.confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <h1>Roulette Game</h1>
-  <div class="game">
-    <div class="wheel">
-      <div class="pointer"></div>
-      <div class="wheel-numbers" id="wheelNumbers"></div>
-    </div>
-    <div>
-      <div class="table" id="table"></div>
-      <div class="outside-bets" id="outsideBets"></div>
-    </div>
+  <h1>🎰 Welcome to Jaskirat's Roulette Table 🎰</h1>
+  <div id="roulette">
+    <div id="ball"></div>
   </div>
-  <div class="controls">
-    Balance: $<span id="balance">1000</span><br>
-    Bet Amount: <input type="number" id="betAmount" value="25" min="1" style="width:60px;">
-    <button class="btn" onclick="clearBets()">Clear Bets</button>
-    <button class="btn" onclick="spinWheel()">Spin</button>
+  <div id="controls">
+    <button onclick="spin()">Spin</button>
+    <button onclick="clearBets()">Clear Bets</button>
+    <select id="chipValue">
+      <option value="5">$5</option>
+      <option value="25">$25</option>
+      <option value="50">$50</option>
+      <option value="100">$100</option>
+    </select>
   </div>
+  <div id="balance">Balance: $1000</div>
+  <div id="table"></div>
+  <div id="popup"></div>
+  <canvas class="confetti"></canvas>
+
+  <audio id="ballSound" src="https://www.soundjay.com/mechanical/sounds/ball-bearing-1.mp3"></audio>
+  <audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
+  <audio id="loseSound" src="https://www.soundjay.com/human/sounds/boo-1.mp3"></audio>
+  <audio id="chipSound" src="https://www.soundjay.com/misc/sounds/coin-drop-4.mp3"></audio>
+
   <script>
-    const balanceEl = document.getElementById('balance');
+    const table = document.getElementById("table");
+    const balanceDisplay = document.getElementById("balance");
+    const popup = document.getElementById("popup");
+    const chipValueSelect = document.getElementById("chipValue");
+    const ball = document.getElementById("ball");
     let balance = 1000;
-    const tableEl = document.getElementById('table');
-    const outsideEl = document.getElementById('outsideBets');
-    const wheelEl = document.getElementById('wheelNumbers');
-    const betAmountEl = document.getElementById('betAmount');
-    let bets = [];const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-const numbers = [0,...Array.from({length:36},(_,i)=>i+1)];
+    let bets = {};
+    let spinning = false;
 
-// Build wheel numbers layout
-numbers.forEach((n,i)=>{
-  let div = document.createElement('div');
-  div.className = 'wheel-number';
-  div.style.transform = `rotate(${(i/numbers.length)*360}deg) translateY(-140px)`;
-  div.textContent = n;
-  div.style.color = n===0?'green':redNumbers.includes(n)?'red':'white';
-  wheelEl.appendChild(div);
-});
+    const numbers = Array.from({length: 37}, (_,i)=>i);
+    const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    
+    numbers.forEach(num=>{
+      const div = document.createElement("div");
+      div.classList.add("cell");
+      if(num===0) div.classList.add("green");
+      else if(redNumbers.includes(num)) div.classList.add("red");
+      else div.classList.add("black");
+      div.textContent = num;
+      div.onclick=()=>placeBet(num,div);
+      table.appendChild(div);
+    });
 
-// Build table grid
-let zeroCell = document.createElement('div');
-zeroCell.textContent = '0';
-zeroCell.className = 'cell zero';
-zeroCell.onclick=()=>placeBet('number',0,zeroCell);
-tableEl.appendChild(zeroCell);
-
-for(let r=0;r<12;r++){
-  for(let c=0;c<3;c++){
-    let num = r*3+(3-c);
-    let cell = document.createElement('div');
-    cell.textContent = num;
-    cell.className = 'cell ' + (redNumbers.includes(num)?'red':'black');
-    cell.onclick=()=>placeBet('number',num,cell);
-    tableEl.appendChild(cell);
-  }
-}
-
-// Build outside bets
-const outsideBets = [
-  {label:"1-12",type:"dozen",value:1},
-  {label:"13-24",type:"dozen",value:2},
-  {label:"25-36",type:"dozen",value:3},
-  {label:"Even",type:"evenodd",value:"even"},
-  {label:"Odd",type:"evenodd",value:"odd"},
-  {label:"Red",type:"color",value:"red"},
-  {label:"Black",type:"color",value:"black"}
-];
-outsideBets.forEach(b=>{
-  let div = document.createElement('div');
-  div.className = 'outside-cell';
-  div.textContent = b.label;
-  div.onclick=()=>placeBet(b.type,b.value,div);
-  outsideEl.appendChild(div);
-});
-
-function placeBet(type,value,cell){
-  let betAmount = parseInt(betAmountEl.value);
-  if(balance<betAmount) return alert('Not enough balance');
-  balance-=betAmount;
-  balanceEl.textContent=balance;
-  bets.push({type,value,amount:betAmount});
-  let chip=document.createElement('div');
-  chip.className='chip';
-  chip.textContent=betAmount;
-  chip.style.top = (Math.random()*10+10)+'px';
-  chip.style.left = (Math.random()*10+10)+'px';
-  cell.appendChild(chip);
-}
-
-function clearBets(){
-  bets=[];
-  document.querySelectorAll('.chip').forEach(c=>c.remove());
-}
-
-function spinWheel(){
-  if(bets.length===0) return alert('Place a bet first!');
-  const winningIndex = Math.floor(Math.random()*numbers.length);
-  const winningNumber = numbers[winningIndex];
-  wheelEl.style.transform = `rotate(${3600+ (360*(winningIndex/numbers.length))}deg)`;
-  setTimeout(()=>{
-    settleBets(winningNumber);
-  },5200);
-}
-
-function settleBets(win){
-  let winnings=0;
-  bets.forEach(b=>{
-    if(b.type==='number' && b.value===win) winnings+=b.amount*36;
-    if(b.type==='color'){
-      if(b.value==='red' && redNumbers.includes(win)) winnings+=b.amount*2;
-      if(b.value==='black' && !redNumbers.includes(win) && win!==0) winnings+=b.amount*2;
+    function placeBet(num,cell){
+      const chipValue = parseInt(chipValueSelect.value);
+      if(balance>=chipValue && !spinning){
+        balance -= chipValue;
+        bets[num] = (bets[num]||0)+chipValue;
+        updateBalance();
+        document.getElementById("chipSound").play();
+        let chip = cell.querySelector(".chip");
+        if(!chip){
+          chip = document.createElement("div");
+          chip.className="chip";
+          chip.textContent="$"+bets[num];
+          cell.appendChild(chip);
+        } else {
+          chip.textContent="$"+bets[num];
+        }
+      }
     }
-    if(b.type==='evenodd'){
-      if(b.value==='even' && win%2===0 && win!==0) winnings+=b.amount*2;
-      if(b.value==='odd' && win%2===1) winnings+=b.amount*2;
-    }
-    if(b.type==='dozen'){
-      if(b.value===1 && win>=1&&win<=12) winnings+=b.amount*3;
-      if(b.value===2 && win>=13&&win<=24) winnings+=b.amount*3;
-      if(b.value===3 && win>=25&&win<=36) winnings+=b.amount*3;
-    }
-  });
-  balance+=winnings;
-  balanceEl.textContent=balance;
-  alert(`Winning number: ${win}\nYou won: $${winnings}`);
-  clearBets();
-}
 
+    function updateBalance(){
+      balanceDisplay.textContent = "Balance: $"+balance;
+    }
+
+    function clearBets(){
+      bets={};
+      document.querySelectorAll(".chip").forEach(c=>c.remove());
+      updateBalance();
+    }
+
+    function spin(){
+      if(spinning) return;
+      spinning=true;
+      document.getElementById("ballSound").play();
+      const winningNumber = Math.floor(Math.random()*37);
+      let deg=0;
+      let ballDeg=0;
+      const spinTime = 15000; 
+      const interval = 30;
+      const totalFrames = spinTime/interval;
+      let frame=0;
+      const spinInterval = setInterval(()=>{
+        frame++;
+        deg += 10;
+        ballDeg -= 20;
+        document.getElementById("roulette").style.transform=`rotate(${deg}deg)`;
+        ball.style.transform=`rotate(${ballDeg}deg) translateY(-180px)`;
+        if(frame>=totalFrames){
+          clearInterval(spinInterval);
+          finishSpin(winningNumber);
+        }
+      },interval);
+    }
+
+    function finishSpin(num){
+      spinning=false;
+      let winAmount=0;
+      if(bets[num]){
+        winAmount += bets[num]*36;
+      }
+      balance += winAmount;
+      updateBalance();
+      if(winAmount>0){
+        showPopup("🎉 You won $"+winAmount+" on "+num+"! 🎉",true);
+        document.getElementById("winSound").play();
+        launchConfetti();
+      } else {
+        showPopup("😞 You lost! Winning number: "+num,false);
+        document.getElementById("loseSound").play();
+      }
+      clearBets();
+    }
+
+    function showPopup(text,win){
+      popup.textContent=text;
+      popup.style.display="block";
+      setTimeout(()=>popup.style.display="none",4000);
+    }
+
+    function launchConfetti(){
+      const canvas = document.querySelector(".confetti");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      let pieces = Array.from({length:150},()=>({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        r:Math.random()*6+4,
+        d:Math.random()*150
+      }));
+      function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle="gold";
+        ctx.beginPath();
+        for(let p of pieces){
+          ctx.moveTo(p.x,p.y);
+          ctx.arc(p.x,p.y,p.r,0,Math.PI*2,true);
+        }
+        ctx.fill();
+        update();
+      }
+      function update(){
+        for(let p of pieces){
+          p.y+=Math.cos(p.d)+1+p.r/2;
+          p.x+=Math.sin(p.d);
+          if(p.y>canvas.height){
+            p.y=0;p.x=Math.random()*canvas.width;
+          }
+        }
+      }
+      setInterval(draw,20);
+      setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),5000);
+    }
   </script>
 </body>
 </html>
