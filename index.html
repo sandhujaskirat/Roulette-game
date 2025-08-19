@@ -181,7 +181,7 @@ canvas.confetti{position:fixed;left:0;top:0;pointer-events:none;z-index:520}
 </div>
 
 <!-- INTRO / RULES OVERLAY (shown on load) -->
-<div class="overlay" id="introOverlay">
+<div class="overlay" id="introOverlay" style="display:flex">
   <div class="modal">
     <h3>Welcome to Jaskirat's Roulette</h3>
     <p><strong>How to play (quick)</strong></p>
@@ -191,7 +191,9 @@ canvas.confetti{position:fixed;left:0;top:0;pointer-events:none;z-index:520}
       <li>Payouts: Straight (single number) = 35:1 (return 36×), Dozens/Columns = 2:1 (return 3×), Color/Even/Odd/High-Low = 1:1 (return 2×).</li>
       <li>Press <strong>Spin</strong> when ready. Wheel spins ~15s; ball spins opposite and bounces until it lands in a pocket.</li>
     </ul>
-    <div style="text-align:center;margin-top:10px"><button class="btn" id="startGameBtn">Start Game</button></div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="btn" id="startGameBtn">Start Game</button>
+    </div>
   </div>
 </div>
 
@@ -200,12 +202,38 @@ canvas.confetti{position:fixed;left:0;top:0;pointer-events:none;z-index:520}
   <div class="modal">
     <h3 id="resultTitle">Result</h3>
     <div id="resultBody"></div>
-    <div style="text-align:center;margin-top:12px"><button class="btn" id="resultOkBtn">OK</button></div>
+    <div style="text-align:center;margin-top:12px">
+      <button class="btn" id="resultOkBtn">OK</button>
+    </div>
   </div>
 </div>
 
 <div class="sad-shade" id="sadShade"></div>
 <canvas class="confetti" id="confettiCanvas"></canvas>
+
+<script>
+  // --- INTRO OVERLAY HANDLING ---
+  const introOverlay = document.getElementById("introOverlay");
+  const startGameBtn = document.getElementById("startGameBtn");
+
+  function closeIntro() {
+    introOverlay.style.display = "none";   // hide it fully
+    introOverlay.classList.add("hidden");
+    gameStarted = true; // mark game as started
+  }
+
+  // ✅ ensure clicking the button actually closes it
+  startGameBtn.addEventListener("click", () => {
+    closeIntro();
+  });
+
+  // show rules on first load
+  window.addEventListener("load", () => {
+    introOverlay.style.display = "flex";
+    introOverlay.classList.remove("hidden");
+  });
+</script>
+
 
 <!-- SOUNDS (public hosted samples) -->
 <audio id="soundWheel" src="https://actions.google.com/sounds/v1/transportation/train_whistle.ogg" preload="auto"></audio>
